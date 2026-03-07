@@ -106,7 +106,6 @@
             position:absolute;
             background: transparent;
             border: none;
-            /* IMPORTANTE: Eliminado translate(-50%, -50%) y scale para evitar deformación de polígonos */
             top: 0; 
             left: 0;
             width: 100%;
@@ -124,7 +123,6 @@
             animation: animFlashRed 0.2s ease-in-out;
         }
 
-        /* Animaciones limpias sin transform que desplacen el polígono */
         @keyframes animFlashGreen {
             0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
             50% { box-shadow: 0 0 0 15px rgba(46, 204, 113, 0.6); background-color: rgba(46, 204, 113, 0.2); }
@@ -188,13 +186,12 @@
             margin-bottom: 20px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { color: white; font-size: 1.2rem; text-align: center; }
+        .loading-text { color: White; font-size: 1.2rem; text-align: center; }
 
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:1000; }
         .modal-content { background:white; padding:2rem; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
         .modal-input { width:100%; padding:10px; margin:10px 0; border:2px solid #ddd; border-radius:8px; font-size:1rem; }
         
-        /* Z-index muy alto para confeti en primera capa */
         .confetti{ position:fixed; width:10px; height:10px; border-radius:50%; animation: confetti-fall 3s linear forwards; z-index:9999; }
         @keyframes confetti-fall{ 0%{ transform:translate(0, -20px) rotate(0); opacity:1;} 100%{ transform:translate(var(--tx), var(--ty)) rotate(360deg); opacity:0; } }
 
@@ -294,13 +291,10 @@
 <script>
     /* --- CONFIGURACIÓN CRÍTICA --- */
     const TOTAL_ELEMENTS = 6;
-    
-    // Dimensiones REALES de la imagen (1118x960)
     const IMG_W = 1118;
     const IMG_H = 960;
 
     /* --- DATOS DEL JUEGO --- */
-    // Coordenadas en píxeles absolutos
     const gameTargets = [
         { word: "Pantalla", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" },
         { word: "Teclado", coords: "692,405,730,544,326,612,280,459" },
@@ -331,8 +325,31 @@
     let startTime;
     let totalTime = 0;
     let timerInterval;
+    let preferredVoice = null; // Variable para guardar la voz preferida
     
     const el = (id) => document.getElementById(id);
+
+    /* --- MEJORA DE VOZ (TTS) --- */
+    function loadVoices() {
+        const voices = speechSynthesis.getVoices();
+        // Buscamos voces en español de España (es-ES)
+        const esVoices = voices.filter(voice => voice.lang === 'es-ES' || voice.lang.startsWith('es'));
+        
+        if (esVoices.length > 0) {
+            // Prioridad: Voces de Google, luego Microsoft, luego la primera disponible
+            preferredVoice = esVoices.find(voice => voice.name.includes('Google')) ||
+                             esVoices.find(voice => voice.name.includes('Microsoft')) ||
+                             esVoices.find(voice => voice.name.includes('Sabina')) || // Voces nativas comunes
+                             esVoices[0];
+        }
+    }
+
+    // Cargar voces cuando estén listas (importante para Chrome/Edge)
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    // Intentar cargar inmediatamente por si ya están listas (Firefox/Safari)
+    loadVoices();
 
     /* --- INICIALIZACIÓN --- */
     window.onload = () => {
@@ -373,6 +390,15 @@
         
         const utterance = new SpeechSynthesisUtterance(word);
         utterance.lang = 'es-ES';
+        
+        // Aplicar voz preferida si se encontró
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+        
+        // Ajustes para sonar más natural
+        utterance.rate = 0.9; // Un poco más lento
+        utterance.pitch = 1; 
         
         if (delay > 0) {
             setTimeout(() => window.speechSynthesis.speak(utterance), delay);
@@ -466,7 +492,6 @@
         if (answered.has(currentIdx)) return;
         
         if (idxClicked === currentIdx) {
-            // Correct
             successCount++;
             this.classList.add('flash-green');
             playSound('correct');
@@ -477,7 +502,6 @@
                 nextQuestion();
             }, 200);
         } else {
-            // Incorrect
             attempts++;
             this.classList.add('flash-red');
             playSound('error');
@@ -510,9 +534,6 @@
         clearInterval(timerInterval);
         totalTime = (Date.now() - startTime) / 1000;
         
-        // Cálculo de puntuación corregido:
-        // 100 puntos base - (errores * (100/12))
-        // Limitado a 0 mínimo
         const penalty = attempts * (100 / 12);
         let score = Math.round(100 - penalty);
         if (score < 0) score = 0;
