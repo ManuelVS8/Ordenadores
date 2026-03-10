@@ -94,7 +94,9 @@
         
         .word-display-container{ display:flex; align-items:center; justify-content:center; gap:0.5rem; flex:1; }
         .word-display{ font-size:clamp(1.2rem,4.5vw,1.8rem); font-weight:900; color:var(--blue-700); text-align:center; }
-        .btn-play-word{ background:var(--blue-600); color:#fff; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background-color .2s; }
+        
+        /* Botón de Play Audio */
+        .btn-play-word{ background:var(--blue-600); color:#fff; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background-color .2s; flex-shrink: 0; }
         .btn-play-word:hover{ background:var(--blue-700); }
         .btn-play-word svg{ width:20px; height:20px; }
 
@@ -188,11 +190,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { color: White; font-size: 1.2rem; text-align: center; }
 
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:1000; }
-        .modal-content { background:white; padding:2rem; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
-        .modal-input { width:100%; padding:10px; margin:10px 0; border:2px solid #ddd; border-radius:8px; font-size:1rem; }
-        
-        /* --- CONFETTI (ACTUALIZADO AL MODELO) --- */
+        /* --- CONFETTI (COPIADO DEL MODELO) --- */
         .confetti{ position:fixed; width:10px; height:10px; border-radius:50%; animation: confetti-fall 3s linear forwards; z-index:999; }
         @keyframes confetti-fall{ 0%{ transform:translate(0, -20px) rotate(0); opacity:1;} 100%{ transform:translate(var(--tx), var(--ty)) rotate(360deg); opacity:0; } }
 
@@ -213,6 +211,7 @@
 <div class="game-container" translate="no">
     <button class="mute-btn" id="muteBtn" title="Silenciar/Activar sonido">🔊</button>
 
+    <!-- Pantalla de Inicio -->
     <section class="screen active" id="startScreen" translate="no">
         <header>
             <h1>Partes de un ordenador</h1>
@@ -231,21 +230,22 @@
         </div>
     </section>
 
-    <section class="screen" id="gameScreen" translate="no">
+    <!-- Pantalla Juego 1: Nombres -->
+    <section class="screen" id="gameScreen1" translate="no">
         <header>
-            <h1>Identifica los siguientes dispositivos y sus elementos 💻</h1>
+            <h1>Identifica los dispositivos 💻</h1>
         </header>
         <div class="game-info">
-            <div class="timer" id="timerGame">00:00.0</div>
-            <div class="progress-bar"><div class="progress-fill" id="progressFillGame"></div></div>
-            <div class="step-counter" id="stepCounter">0/6</div>
+            <div class="timer" id="timerGame1">00:00.0</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFillGame1"></div></div>
+            <div class="step-counter" id="stepCounter1">0/6</div>
         </div>
 
         <div class="board">
             <div class="panel">
                 <div class="word-display-container">
-                    <div class="word-display" id="wordDisplay">...</div>
-                    <button class="btn-play-word" id="playWordBtn" title="Reproducir audio" aria-label="Reproducir audio">
+                    <div class="word-display" id="wordDisplay1">...</div>
+                    <button class="btn-play-word" id="playWordBtn1" title="Reproducir audio" aria-label="Reproducir audio">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 5v14l11-7z" fill="currentColor"/>
                         </svg>
@@ -254,14 +254,47 @@
             </div>
 
             <div class="stage">
-                <div class="img-wrap" id="imgWrap">
-                    <img id="bodyImg" src="https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/C_MEDIO1/Materiales/Ordenadores.png" alt="Partes de un ordenador">
-                    <div class="overlay-click" id="overlayClick" aria-hidden="true"></div>
+                <div class="img-wrap" id="imgWrap1">
+                    <img id="bodyImg1" src="https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/C_MEDIO1/Materiales/Ordenadores.png" alt="Partes de un ordenador">
+                    <div class="overlay-click" id="overlayClick1" aria-hidden="true"></div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Pantalla Juego 2: Funciones -->
+    <section class="screen" id="gameScreen2" translate="no">
+        <header>
+            <h1>¿Para qué sirve? 🤔</h1>
+        </header>
+        <div class="game-info">
+            <div class="timer" id="timerGame2">00:00.0</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFillGame2"></div></div>
+            <div class="step-counter" id="stepCounter2">0/6</div>
+        </div>
+
+        <div class="board">
+            <div class="panel">
+                <div class="word-display-container">
+                    <div class="word-display" id="wordDisplay2">...</div>
+                    <button class="btn-play-word" id="playWordBtn2" title="Reproducir audio" aria-label="Reproducir audio">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 5v14l11-7z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="stage">
+                <div class="img-wrap" id="imgWrap2">
+                    <img id="bodyImg2" src="https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/C_MEDIO1/Materiales/Ordenadores.png" alt="Partes de un ordenador">
+                    <div class="overlay-click" id="overlayClick2" aria-hidden="true"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pantalla Final -->
     <section class="screen" id="finalScreen" translate="no">
         <header>
             <h1 class="final-title">Partes de un ordenador</h1>
@@ -291,18 +324,29 @@
 
 <script>
     /* --- CONFIGURACIÓN CRÍTICA --- */
-    const TOTAL_ELEMENTS = 6;
     const IMG_W = 1118;
     const IMG_H = 960;
+    const TOTAL_ELEMENTS = 6; // Elementos por nivel
 
     /* --- DATOS DEL JUEGO --- */
-    const gameTargets = [
+    // Nivel 1: Nombres
+    const game1Targets = [
         { word: "Pantalla", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" },
         { word: "Teclado", coords: "692,405,730,544,326,612,280,459" },
         { word: "Ratón", coords: "196,604,236,549,173,405,103,411,64,438,73,502,112,582" },
         { word: "Torre", coords: "894,-1,771,107,759,455,1083,463,1077,16" },
         { word: "Tablet", coords: "364,920,436,681,162,692,86,891" },
         { word: "Portátil", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" }
+    ];
+
+    // Nivel 2: Funciones/Definiciones
+    const game2Targets = [
+        { word: "Muestra imágenes y textos", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" }, // Pantalla
+        { word: "Sirve para escribir", coords: "692,405,730,544,326,612,280,459" }, // Teclado
+        { word: "Se utiliza para movernos por la pantalla, para seleccionar o para ir de un programa a otro", coords: "196,604,236,549,173,405,103,411,64,438,73,502,112,582" }, // Ratón
+        { word: "Es el cerebro del ordenador, donde se procesa la información", coords: "894,-1,771,107,759,455,1083,463,1077,16" }, // Torre
+        { word: "Dispositivo de pantalla táctil de mayor tamaño que un móvil", coords: "364,920,436,681,162,692,86,891" }, // Tablet
+        { word: "Tiene la pantalla, el teclado y el ratón en un mismo aparato. Puedes llevártelo a tu lugar de trabajo", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" } // Portátil
     ];
 
     /* --- AUDIOS --- */
@@ -315,8 +359,7 @@
     };
 
     /* --- VARIABLES DE ESTADO --- */
-    let attempts = 0;
-    let successCount = 0;
+    let successCount = 0; // Contador global de aciertos
     let playOrder = [];
     let playIndex = 0;
     let answered = new Set();
@@ -326,6 +369,7 @@
     let startTime;
     let totalTime = 0;
     let timerInterval;
+    let currentGame = 1;
     let preferredVoice = null;
     
     const el = (id) => document.getElementById(id);
@@ -336,10 +380,18 @@
         const esVoices = voices.filter(voice => voice.lang === 'es-ES' || voice.lang.startsWith('es'));
         
         if (esVoices.length > 0) {
-            preferredVoice = esVoices.find(voice => voice.name.includes('Google')) ||
-                             esVoices.find(voice => voice.name.includes('Microsoft')) ||
-                             esVoices.find(voice => voice.name.includes('Sabina')) ||
-                             esVoices[0];
+            // 1. Prioridad Google
+            preferredVoice = esVoices.find(voice => voice.name.includes('Google'));
+            
+            // 2. Alternativa Microsoft/Natural
+            if (!preferredVoice) {
+                preferredVoice = esVoices.find(voice => voice.name.includes('Microsoft') || voice.name.includes('Natural'));
+            }
+            
+            // 3. Fallback inteligente (Primera disponible)
+            if (!preferredVoice) {
+                preferredVoice = esVoices[0];
+            }
         }
     }
 
@@ -351,12 +403,23 @@
     /* --- INICIALIZACIÓN --- */
     window.onload = () => {
         el('playBtn').onclick = startGame;
-        el('playWordBtn').onclick = () => playWordAudio(gameTargets[playOrder[playIndex]].word, 0);
+        
+        // Botones de audio manuales
+        el('playWordBtn1').onclick = () => {
+            const targets = game1Targets;
+            playWordAudio(targets[playOrder[playIndex]].word, 0);
+        };
+        el('playWordBtn2').onclick = () => {
+            const targets = game2Targets;
+            playWordAudio(targets[playOrder[playIndex]].word, 0);
+        };
+        
         el('muteBtn').onclick = toggleSound;
         el('restartBtn').onclick = () => { playSound('tap'); location.reload(); };
         
         window.addEventListener('resize', () => {
-            if(el('gameScreen').classList.contains('active')) placeMarkers();
+            if(el('gameScreen1').classList.contains('active')) placeMarkers(game1Targets, el('bodyImg1'), el('imgWrap1'));
+            if(el('gameScreen2').classList.contains('active')) placeMarkers(game2Targets, el('bodyImg2'), el('imgWrap2'));
         });
     };
 
@@ -383,7 +446,7 @@
 
     async function playWordAudio(word, delay) {
         if (isMuted) return;
-        window.speechSynthesis.cancel();
+        window.speechSynthesis.cancel(); // Cancelar audio previo
         
         const utterance = new SpeechSynthesisUtterance(word);
         utterance.lang = 'es-ES';
@@ -392,7 +455,8 @@
             utterance.voice = preferredVoice;
         }
         
-        utterance.rate = 0.9;
+        // Velocidad x0.8 solicitada
+        utterance.rate = 0.8; 
         utterance.pitch = 1; 
         
         if (delay > 0) {
@@ -405,8 +469,8 @@
     function startGame() {
         playSound('tap');
         startTime = Date.now();
-        showScreen('gameScreen');
-        initGame();
+        showScreen('gameScreen1');
+        initGame(1);
         startTimer();
     }
 
@@ -414,7 +478,9 @@
         if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             const elapsed = (Date.now() - startTime) / 1000;
-            el('timerGame').textContent = formatTime(elapsed);
+            // Actualizar ambos timers por si acaso, o solo el activo
+            if(currentGame === 1) el('timerGame1').textContent = formatTime(elapsed);
+            if(currentGame === 2) el('timerGame2').textContent = formatTime(elapsed);
         }, 100);
     }
 
@@ -423,36 +489,37 @@
         el(screenId).classList.add('active');
     }
 
-    function initGame() {
+    function initGame(gameNum) {
+        currentGame = gameNum;
         markers.forEach(m => m.remove());
         markers = [];
         answered.clear();
         playIndex = 0;
-        successCount = 0;
-        attempts = 0;
         
-        playOrder = Array.from({length: gameTargets.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+        const targets = (gameNum === 1) ? game1Targets : game2Targets;
+        const imgId = (gameNum === 1) ? 'bodyImg1' : 'bodyImg2';
+        const imgWrapId = (gameNum === 1) ? 'imgWrap1' : 'imgWrap2';
         
-        el('progressFillGame').style.width = '0%';
-        el('stepCounter').textContent = '0/' + gameTargets.length;
+        playOrder = Array.from({length: targets.length}, (_, i) => i).sort(() => Math.random() - 0.5);
         
-        const img = el('bodyImg');
+        el('progressFillGame' + gameNum).style.width = '0%';
+        el('stepCounter' + gameNum).textContent = '0/' + targets.length;
+        
+        const img = el(imgId);
         if (img.complete) {
-            placeMarkers();
+            placeMarkers(targets, el(imgId), el(imgWrapId));
         } else {
-            img.onload = () => placeMarkers();
+            img.onload = () => placeMarkers(targets, el(imgId), el(imgWrapId));
         }
         
         updateQuestion();
     }
 
-    function placeMarkers() {
+    function placeMarkers(targets, imgElement, container) {
         markers.forEach(m => m.remove());
         markers = [];
         
-        const container = el('imgWrap');
-        
-        gameTargets.forEach((target, index) => {
+        targets.forEach((target, index) => {
             const coords = target.coords.split(',').map(Number);
             const polygonPoints = [];
             
@@ -474,9 +541,10 @@
     }
 
     function updateQuestion() {
+        const targets = (currentGame === 1) ? game1Targets : game2Targets;
         const currentIdx = playOrder[playIndex];
-        const word = gameTargets[currentIdx].word;
-        el('wordDisplay').textContent = word;
+        const word = targets[currentIdx].word;
+        el('wordDisplay' + currentGame).textContent = word;
         playWordAudio(word, 500);
     }
 
@@ -497,11 +565,10 @@
                 nextQuestion();
             }, 200);
         } else {
-            attempts++;
             this.classList.add('flash-red');
             playSound('error');
             
-            const stage = el('gameScreen').querySelector('.stage');
+            const stage = el('gameScreen' + currentGame).querySelector('.stage');
             stage.classList.add('shake');
             setTimeout(() => stage.classList.remove('shake'), 400);
             
@@ -513,15 +580,22 @@
 
     function nextQuestion() {
         playIndex++;
+        const targets = (currentGame === 1) ? game1Targets : game2Targets;
         
-        const progress = (playIndex / gameTargets.length) * 100;
-        el('progressFillGame').style.width = progress + '%';
-        el('stepCounter').textContent = playIndex + '/' + gameTargets.length;
+        const progress = (playIndex / targets.length) * 100;
+        el('progressFillGame' + currentGame).style.width = progress + '%';
+        el('stepCounter' + currentGame).textContent = playIndex + '/' + targets.length;
         
-        if (playIndex < gameTargets.length) {
+        if (playIndex < targets.length) {
             updateQuestion();
         } else {
-            finishGame();
+            if (currentGame === 1) {
+                // Pasar al Nivel 2
+                showScreen('gameScreen2');
+                initGame(2);
+            } else {
+                finishGame();
+            }
         }
     }
 
@@ -529,9 +603,10 @@
         clearInterval(timerInterval);
         totalTime = (Date.now() - startTime) / 1000;
         
-        const penalty = attempts * (100 / 12);
-        let score = Math.round(100 - penalty);
-        if (score < 0) score = 0;
+        // Cálculo de puntuación: (100 / total_preguntas) * n_aciertos
+        // Total preguntas = 12 (6 nivel 1 + 6 nivel 2)
+        const totalQuestions = game1Targets.length + game2Targets.length;
+        let score = Math.round((100 / totalQuestions) * successCount);
         
         showScreen('finalScreen');
         el('finalScore').textContent = score;
@@ -541,7 +616,7 @@
             el('trophyBox').style.display = 'block';
             el('finalMsg').textContent = "¡Enhorabuena, puntuación máxima!";
             playSound('victory');
-            createConfetti(); // LLAMADA A LA FUNCIÓN COPIADA
+            createConfetti();
         } else {
             el('trophyBox').style.display = 'none';
             el('finalMsg').textContent = "¡Buen trabajo! Sigue practicando";
