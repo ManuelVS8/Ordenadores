@@ -326,7 +326,8 @@
     /* --- CONFIGURACIÓN CRÍTICA --- */
     const IMG_W = 1118;
     const IMG_H = 960;
-    const TOTAL_ELEMENTS = 6; // Elementos por nivel
+    const TOTAL_PREGUNTAS_NIVEL1 = 6;
+    const TOTAL_PREGUNTAS_NIVEL2 = 6;
 
     /* --- DATOS DEL JUEGO --- */
     // Nivel 1: Nombres
@@ -359,7 +360,11 @@
     };
 
     /* --- VARIABLES DE ESTADO --- */
-    let successCount = 0; // Contador global de aciertos
+    let successCount1 = 0; // Aciertos Nivel 1
+    let errorsCount1 = 0;  // Errores Nivel 1
+    let successCount2 = 0; // Aciertos Nivel 2
+    let errorsCount2 = 0;  // Errores Nivel 2
+    
     let playOrder = [];
     let playIndex = 0;
     let answered = new Set();
@@ -380,15 +385,10 @@
         const esVoices = voices.filter(voice => voice.lang === 'es-ES' || voice.lang.startsWith('es'));
         
         if (esVoices.length > 0) {
-            // 1. Prioridad Google
             preferredVoice = esVoices.find(voice => voice.name.includes('Google'));
-            
-            // 2. Alternativa Microsoft/Natural
             if (!preferredVoice) {
                 preferredVoice = esVoices.find(voice => voice.name.includes('Microsoft') || voice.name.includes('Natural'));
             }
-            
-            // 3. Fallback inteligente (Primera disponible)
             if (!preferredVoice) {
                 preferredVoice = esVoices[0];
             }
@@ -404,7 +404,6 @@
     window.onload = () => {
         el('playBtn').onclick = startGame;
         
-        // Botones de audio manuales
         el('playWordBtn1').onclick = () => {
             const targets = game1Targets;
             playWordAudio(targets[playOrder[playIndex]].word, 0);
@@ -446,7 +445,7 @@
 
     async function playWordAudio(word, delay) {
         if (isMuted) return;
-        window.speechSynthesis.cancel(); // Cancelar audio previo
+        window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(word);
         utterance.lang = 'es-ES';
@@ -455,7 +454,6 @@
             utterance.voice = preferredVoice;
         }
         
-        // Velocidad x0.8 solicitada
         utterance.rate = 0.8; 
         utterance.pitch = 1; 
         
@@ -478,7 +476,6 @@
         if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             const elapsed = (Date.now() - startTime) / 1000;
-            // Actualizar ambos timers por si acaso, o solo el activo
             if(currentGame === 1) el('timerGame1').textContent = formatTime(elapsed);
             if(currentGame === 2) el('timerGame2').textContent = formatTime(elapsed);
         }, 100);
@@ -555,7 +552,10 @@
         if (answered.has(currentIdx)) return;
         
         if (idxClicked === currentIdx) {
-            successCount++;
+            // ACIERTO
+            if(currentGame === 1) successCount1++;
+            if(currentGame === 2) successCount2++;
+            
             this.classList.add('flash-green');
             playSound('correct');
             answered.add(currentIdx);
@@ -565,6 +565,10 @@
                 nextQuestion();
             }, 200);
         } else {
+            // ERROR
+            if(currentGame === 1) errorsCount1++;
+            if(currentGame === 2) errorsCount2++;
+            
             this.classList.add('flash-red');
             playSound('error');
             
@@ -590,7 +594,6 @@
             updateQuestion();
         } else {
             if (currentGame === 1) {
-                // Pasar al Nivel 2
                 showScreen('gameScreen2');
                 initGame(2);
             } else {
@@ -600,13 +603,21 @@
     }
 
     function finishGame() {
+        // --- INSTRUCCIÓN CRÍTICA: DETENER AUDIOS ---
+        // Cancela cualquier audio del juego anterior inmediatamente
+        window.speechSynthesis.cancel();
+        
         clearInterval(timerInterval);
         totalTime = (Date.now() - startTime) / 1000;
         
-        // Cálculo de puntuación: (100 / total_preguntas) * n_aciertos
-        // Total preguntas = 12 (6 nivel 1 + 6 nivel 2)
-        const totalQuestions = game1Targets.length + game2Targets.length;
-        let score = Math.round((100 / totalQuestions) * successCount);
+        // --- CÁLCULO DE PUNTUACIÓN ---
+        const totalPreguntas = TOTAL_PREGUNTAS_NIVEL1 + TOTAL_PREGUNTAS_NIVEL2;
+        const totalAciertos = successCount1 + successCount2;
+        const totalErrores = errorsCount1 + errorsCount2;
+        
+        let rawScore = (100.0 / totalPreguntas) * (totalAciertos - totalErrores);
+        let score = Math.max(0, rawScore);
+        score = Math.round(score);
         
         showScreen('finalScreen');
         el('finalScore').textContent = score;
@@ -631,7 +642,7 @@
         return `${m}:${s}.${ms}`;
     }
 
-    /* --- CONFETTI EFFECT (COPIADO DEL MODELO) --- */
+    /* --- CONFETTI EFFECT --- */
     function createConfetti() {
         for(let i=0;i<100;i++){
             setTimeout(()=>{
