@@ -95,7 +95,6 @@
         .word-display-container{ display:flex; align-items:center; justify-content:center; gap:0.5rem; flex:1; }
         .word-display{ font-size:clamp(1.2rem,4.5vw,1.8rem); font-weight:900; color:var(--blue-700); text-align:center; }
         
-        /* Botón de Play Audio */
         .btn-play-word{ background:var(--blue-600); color:#fff; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background-color .2s; flex-shrink: 0; }
         .btn-play-word:hover{ background:var(--blue-700); }
         .btn-play-word svg{ width:20px; height:20px; }
@@ -118,12 +117,8 @@
             cursor: pointer;
         }
 
-        .marker.flash-green {
-            animation: animFlashGreen 0.2s ease-in-out;
-        }
-        .marker.flash-red {
-            animation: animFlashRed 0.2s ease-in-out;
-        }
+        .marker.flash-green { animation: animFlashGreen 0.2s ease-in-out; }
+        .marker.flash-red { animation: animFlashRed 0.2s ease-in-out; }
 
         @keyframes animFlashGreen {
             0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
@@ -169,28 +164,7 @@
         @media (max-width: 899px) { .school-logo { width: 140px; max-width: 160px; } }
         @media (max-width: 420px) { .school-logo { width: 110px; max-width: 40%; margin-top: 0.6rem; } }
 
-        .loading-indicator {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            flex-direction: column;
-        }
-        .loading-spinner {
-            width: 50px; height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--orange);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { color: White; font-size: 1.2rem; text-align: center; }
-
-        /* --- CONFETTI (COPIADO DEL MODELO) --- */
+        /* --- CONFETTI --- */
         .confetti{ position:fixed; width:10px; height:10px; border-radius:50%; animation: confetti-fall 3s linear forwards; z-index:999; }
         @keyframes confetti-fall{ 0%{ transform:translate(0, -20px) rotate(0); opacity:1;} 100%{ transform:translate(var(--tx), var(--ty)) rotate(360deg); opacity:0; } }
 
@@ -211,7 +185,6 @@
 <div class="game-container" translate="no">
     <button class="mute-btn" id="muteBtn" title="Silenciar/Activar sonido">🔊</button>
 
-    <!-- Pantalla de Inicio -->
     <section class="screen active" id="startScreen" translate="no">
         <header>
             <h1>Partes de un ordenador</h1>
@@ -230,7 +203,6 @@
         </div>
     </section>
 
-    <!-- Pantalla Juego 1: Nombres -->
     <section class="screen" id="gameScreen1" translate="no">
         <header>
             <h1>Identifica los dispositivos 💻</h1>
@@ -262,7 +234,6 @@
         </div>
     </section>
 
-    <!-- Pantalla Juego 2: Funciones -->
     <section class="screen" id="gameScreen2" translate="no">
         <header>
             <h1>¿Para qué sirve? 🤔</h1>
@@ -294,7 +265,6 @@
         </div>
     </section>
 
-    <!-- Pantalla Final -->
     <section class="screen" id="finalScreen" translate="no">
         <header>
             <h1 class="final-title">Partes de un ordenador</h1>
@@ -330,7 +300,6 @@
     const TOTAL_PREGUNTAS_NIVEL2 = 6;
 
     /* --- DATOS DEL JUEGO --- */
-    // Nivel 1: Nombres
     const game1Targets = [
         { word: "Pantalla", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" },
         { word: "Teclado", coords: "692,405,730,544,326,612,280,459" },
@@ -340,14 +309,13 @@
         { word: "Portátil", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" }
     ];
 
-    // Nivel 2: Funciones/Definiciones
     const game2Targets = [
-        { word: "Muestra imágenes y textos", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" }, // Pantalla
-        { word: "Sirve para escribir", coords: "692,405,730,544,326,612,280,459" }, // Teclado
-        { word: "Se utiliza para movernos por la pantalla, para seleccionar o para ir de un programa a otro", coords: "196,604,236,549,173,405,103,411,64,438,73,502,112,582" }, // Ratón
-        { word: "Es el cerebro del ordenador, donde se procesa la información", coords: "894,-1,771,107,759,455,1083,463,1077,16" }, // Torre
-        { word: "Dispositivo de pantalla táctil de mayor tamaño que un móvil", coords: "364,920,436,681,162,692,86,891" }, // Tablet
-        { word: "Tiene la pantalla, el teclado y el ratón en un mismo aparato. Puedes llevártelo a tu lugar de trabajo", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" } // Portátil
+        { word: "Muestra imágenes y textos", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" },
+        { word: "Sirve para escribir", coords: "692,405,730,544,326,612,280,459" },
+        { word: "Se utiliza para movernos por la pantalla, para seleccionar o para ir de un programa a otro", coords: "196,604,236,549,173,405,103,411,64,438,73,502,112,582" },
+        { word: "Es el cerebro del ordenador, donde se procesa la información", coords: "894,-1,771,107,759,455,1083,463,1077,16" },
+        { word: "Dispositivo de pantalla táctil de mayor tamaño que un móvil", coords: "364,920,436,681,162,692,86,891" },
+        { word: "Tiene la pantalla, el teclado y el ratón en un mismo aparato. Puedes llevártelo a tu lugar de trabajo", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" }
     ];
 
     /* --- AUDIOS --- */
@@ -360,10 +328,10 @@
     };
 
     /* --- VARIABLES DE ESTADO --- */
-    let successCount1 = 0; // Aciertos Nivel 1
-    let errorsCount1 = 0;  // Errores Nivel 1
-    let successCount2 = 0; // Aciertos Nivel 2
-    let errorsCount2 = 0;  // Errores Nivel 2
+    let successCount1 = 0; 
+    let errorsCount1 = 0;  
+    let successCount2 = 0; 
+    let errorsCount2 = 0;  
     
     let playOrder = [];
     let playIndex = 0;
@@ -376,41 +344,75 @@
     let timerInterval;
     let currentGame = 1;
     let preferredVoice = null;
+    let voicesLoaded = false; // Flag para saber si las voces están listas
     
     const el = (id) => document.getElementById(id);
 
-    /* --- MEJORA DE VOZ (TTS) --- */
+    /* --- MEJORA DE VOZ (TTS) & FIX CHROMEOS --- */
     function loadVoices() {
         const voices = speechSynthesis.getVoices();
-        const esVoices = voices.filter(voice => voice.lang === 'es-ES' || voice.lang.startsWith('es'));
-        
-        if (esVoices.length > 0) {
-            preferredVoice = esVoices.find(voice => voice.name.includes('Google'));
-            if (!preferredVoice) {
-                preferredVoice = esVoices.find(voice => voice.name.includes('Microsoft') || voice.name.includes('Natural'));
-            }
-            if (!preferredVoice) {
-                preferredVoice = esVoices[0];
+        if (voices.length > 0) {
+            voicesLoaded = true;
+            const esVoices = voices.filter(voice => voice.lang === 'es-ES' || voice.lang.startsWith('es'));
+            if (esVoices.length > 0) {
+                preferredVoice = esVoices.find(voice => voice.name.includes('Google')) ||
+                                 esVoices.find(voice => voice.name.includes('Microsoft')) ||
+                                 esVoices.find(voice => voice.name.includes('Natural')) ||
+                                 esVoices[0];
             }
         }
     }
 
+    // Intentar cargar voces inmediatamente y en el evento onvoiceschanged
+    loadVoices();
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = loadVoices;
     }
-    loadVoices();
+
+    // Función para "desbloquear" el audio en ChromeOS
+    // Lanza un sonido silencioso o una frase corta para activar el motor TTS
+    function unlockAudioContext() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        // Crear un buffer silencioso y reproducirlo para activar el contexto de audio
+        const buffer = audioContext.createBuffer(1, 1, 22050);
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        source.start(0);
+    }
+
+    function forceInitTTS() {
+        // Pequeño truco para ChromeOS: 
+        // Si las voces no se han cargado, forzamos la carga con un utterance vacío
+        if (!voicesLoaded) {
+            const tempUtterance = new SpeechSynthesisUtterance('');
+            tempUtterance.rate = 0.1; // Muy rápido
+            window.speechSynthesis.speak(tempUtterance);
+        }
+    }
 
     /* --- INICIALIZACIÓN --- */
     window.onload = () => {
-        el('playBtn').onclick = startGame;
+        // Al cargar la página, intentamos desbloquear el contexto de audio
+        unlockAudioContext();
+
+        el('playBtn').onclick = () => {
+            playSound('tap');
+            // Forzamos la inicialización del TTS al hacer clic en comenzar
+            forceInitTTS(); 
+            startGame();
+        };
         
         el('playWordBtn1').onclick = () => {
-            const targets = game1Targets;
-            playWordAudio(targets[playOrder[playIndex]].word, 0);
+            // Al pulsar el botón de audio manual, garantizamos interacción
+            unlockAudioContext();
+            playWordAudio(game1Targets[playOrder[playIndex]].word, 0);
         };
         el('playWordBtn2').onclick = () => {
-            const targets = game2Targets;
-            playWordAudio(targets[playOrder[playIndex]].word, 0);
+            unlockAudioContext();
+            playWordAudio(game2Targets[playOrder[playIndex]].word, 0);
         };
         
         el('muteBtn').onclick = toggleSound;
@@ -552,7 +554,6 @@
         if (answered.has(currentIdx)) return;
         
         if (idxClicked === currentIdx) {
-            // ACIERTO
             if(currentGame === 1) successCount1++;
             if(currentGame === 2) successCount2++;
             
@@ -565,7 +566,6 @@
                 nextQuestion();
             }, 200);
         } else {
-            // ERROR
             if(currentGame === 1) errorsCount1++;
             if(currentGame === 2) errorsCount2++;
             
@@ -603,14 +603,11 @@
     }
 
     function finishGame() {
-        // --- INSTRUCCIÓN CRÍTICA: DETENER AUDIOS ---
-        // Cancela cualquier audio del juego anterior inmediatamente
         window.speechSynthesis.cancel();
         
         clearInterval(timerInterval);
         totalTime = (Date.now() - startTime) / 1000;
         
-        // --- CÁLCULO DE PUNTUACIÓN ---
         const totalPreguntas = TOTAL_PREGUNTAS_NIVEL1 + TOTAL_PREGUNTAS_NIVEL2;
         const totalAciertos = successCount1 + successCount2;
         const totalErrores = errorsCount1 + errorsCount2;
@@ -642,7 +639,6 @@
         return `${m}:${s}.${ms}`;
     }
 
-    /* --- CONFETTI EFFECT --- */
     function createConfetti() {
         for(let i=0;i<100;i++){
             setTimeout(()=>{
