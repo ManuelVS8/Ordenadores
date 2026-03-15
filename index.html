@@ -101,7 +101,7 @@
         .btn-play-word svg{ width:20px; height:20px; }
 
         .stage{ background:#fff; border-radius:12px; border:2px solid #e6f2ff; padding:.6rem; box-shadow: inset 0 0 0 1px #f3f7ff; position: relative;}
-        .img-wrap{ position:relative; width:100%; max-width:100%; margin:0 auto; user-select: none; -webkit-user-select: none;}
+        .img-wrap{ position:relative; width:100%; max-width:100%; margin:0 auto; user-select: None; -webkit-user-select: none;}
         .img-wrap img{ display:block; width:100%; height:auto; border-radius:10px; user-select:none; -webkit-user-drag:none; }
 
         .marker{
@@ -330,7 +330,6 @@
     const TOTAL_PREGUNTAS_NIVEL2 = 6;
 
     /* --- DATOS DEL JUEGO --- */
-    // Nivel 1: Nombres
     const game1Targets = [
         { word: "Pantalla", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" },
         { word: "Teclado", coords: "692,405,730,544,326,612,280,459" },
@@ -340,14 +339,13 @@
         { word: "Portátil", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" }
     ];
 
-    // Nivel 2: Funciones/Definiciones
     const game2Targets = [
-        { word: "Muestra imágenes y textos", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" }, // Pantalla
-        { word: "Sirve para escribir", coords: "692,405,730,544,326,612,280,459" }, // Teclado
-        { word: "Se utiliza para movernos por la pantalla, para seleccionar o para ir de un programa a otro", coords: "196,604,236,549,173,405,103,411,64,438,73,502,112,582" }, // Ratón
-        { word: "Es el cerebro del ordenador, donde se procesa la información", coords: "894,-1,771,107,759,455,1083,463,1077,16" }, // Torre
-        { word: "Dispositivo de pantalla táctil de mayor tamaño que un móvil", coords: "364,920,436,681,162,692,86,891" }, // Tablet
-        { word: "Tiene la pantalla, el teclado y el ratón en un mismo aparato. Puedes llevártelo a tu lugar de trabajo", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" } // Portátil
+        { word: "Muestra imágenes y textos", coords: "138,-1,502,29,498,288,441,361,258,373,136,312" },
+        { word: "Sirve para escribir", coords: "692,405,730,544,326,612,280,459" },
+        { word: "Se utiliza para movernos por la pantalla, para seleccionar o para ir de un programa a otro", coords: "196,604,236,549,173,405,103,411,64,438,73,502,112,582" },
+        { word: "Es el cerebro del ordenador, donde se procesa la información", coords: "894,-1,771,107,759,455,1083,463,1077,16" },
+        { word: "Dispositivo de pantalla táctil de mayor tamaño que un móvil", coords: "364,920,436,681,162,692,86,891" },
+        { word: "Tiene la pantalla, el teclado y el ratón en un mismo aparato. Puedes llevártelo a tu lugar de trabajo", coords: "616,787,687,938,906,895,1012,690,883,587,804,741,616,773" }
     ];
 
     /* --- AUDIOS --- */
@@ -360,10 +358,10 @@
     };
 
     /* --- VARIABLES DE ESTADO --- */
-    let successCount1 = 0; // Aciertos Nivel 1
-    let errorsCount1 = 0;  // Errores Nivel 1
-    let successCount2 = 0; // Aciertos Nivel 2
-    let errorsCount2 = 0;  // Errores Nivel 2
+    let successCount1 = 0;
+    let errorsCount1 = 0;
+    let successCount2 = 0;
+    let errorsCount2 = 0;
     
     let playOrder = [];
     let playIndex = 0;
@@ -375,46 +373,59 @@
     let totalTime = 0;
     let timerInterval;
     let currentGame = 1;
+    
     const el = (id) => document.getElementById(id);
 
-    /* --- SÍNTESIS DE VOZ: Google TTS (sin Web Speech API) ---
-       Usa translate.google.com para generar MP3 del texto.
-       Funciona en Chromebooks sin voces instaladas. */
-    let currentTTSAudio = null;
-
-    function playWordAudio(word, delay) {
+    /* --- NUEVO SISTEMA DE VOZ: GOOGLE TTS API (SOLUCIÓN CHROMEOS) --- */
+    // En lugar de speechSynthesis, usamos la API de Google Translate que devuelve un MP3.
+    // Esto funciona en cualquier dispositivo que pueda reproducir audio (como los sonidos de GitHub).
+    function playWordAudio(text, delay) {
         if (isMuted) return;
-        // Cancelar audio TTS anterior si lo hay
-        if (currentTTSAudio) { currentTTSAudio.pause(); currentTTSAudio = null; }
-
-        function doSpeak() {
-            if (isMuted) return;
-            const url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=es&client=tw-ob&q=' + encodeURIComponent(word);
-            const audio = new Audio(url);
-            audio.volume = 1.0;
-            currentTTSAudio = audio;
-            audio.play().catch(e => console.warn('Google TTS error:', e));
+        
+        // Usamos Audio en lugar de SpeechSynthesisUtterance
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=es&client=tw-ob`;
+        const audio = new Audio(url);
+        
+        // Reproducir
+        if (delay > 0) {
+            setTimeout(() => audio.play().catch(e => console.log("Error audio TTS:", e)), delay);
+        } else {
+            audio.play().catch(e => console.log("Error audio TTS:", e));
         }
-
-        if (delay > 0) setTimeout(doSpeak, delay);
-        else doSpeak();
     }
 
-    function stopTTS() {
-        if (currentTTSAudio) { currentTTSAudio.pause(); currentTTSAudio = null; }
-    }
+    /* --- INICIALIZACIÓN --- */
+    window.onload = () => {
+        el('playBtn').onclick = startGame;
+        
+        el('playWordBtn1').onclick = () => {
+            const targets = game1Targets;
+            playWordAudio(targets[playOrder[playIndex]].word, 0);
+        };
+        el('playWordBtn2').onclick = () => {
+            const targets = game2Targets;
+            playWordAudio(targets[playOrder[playIndex]].word, 0);
+        };
+        
+        el('muteBtn').onclick = toggleSound;
+        el('restartBtn').onclick = () => { playSound('tap'); location.reload(); };
+        
+        window.addEventListener('resize', () => {
+            if(el('gameScreen1').classList.contains('active')) placeMarkers(game1Targets, el('bodyImg1'), el('imgWrap1'));
+            if(el('gameScreen2').classList.contains('active')) placeMarkers(game2Targets, el('bodyImg2'), el('imgWrap2'));
+        });
+    };
 
-    /* --- AUDIO EFECTOS --- */
     function toggleSound() {
         isMuted = !isMuted;
         el('muteBtn').textContent = isMuted ? '🔇' : '🔊';
-        if (isMuted) stopTTS();
         playSound('tap');
     }
 
     function playSound(type) {
         if (isMuted) return;
         if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
         fetch(audioUrls[type])
             .then(response => response.arrayBuffer())
             .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
@@ -425,28 +436,6 @@
                 source.start(0);
             });
     }
-
-    /* --- INICIALIZACIÓN --- */
-    window.onload = () => {
-        el('playBtn').onclick = startGame;
-
-        el('playWordBtn1').onclick = () => {
-            const targets = game1Targets;
-            playWordAudio(targets[playOrder[playIndex]].word, 0);
-        };
-        el('playWordBtn2').onclick = () => {
-            const targets = game2Targets;
-            playWordAudio(targets[playOrder[playIndex]].word, 0);
-        };
-
-        el('muteBtn').onclick = toggleSound;
-        el('restartBtn').onclick = () => { playSound('tap'); location.reload(); };
-
-        window.addEventListener('resize', () => {
-            if (el('gameScreen1').classList.contains('active')) placeMarkers(game1Targets, el('bodyImg1'), el('imgWrap1'));
-            if (el('gameScreen2').classList.contains('active')) placeMarkers(game2Targets, el('bodyImg2'), el('imgWrap2'));
-        });
-    };
 
     function startGame() {
         playSound('tap');
@@ -536,7 +525,6 @@
         if (answered.has(currentIdx)) return;
         
         if (idxClicked === currentIdx) {
-            // ACIERTO
             if(currentGame === 1) successCount1++;
             if(currentGame === 2) successCount2++;
             
@@ -549,7 +537,6 @@
                 nextQuestion();
             }, 200);
         } else {
-            // ERROR
             if(currentGame === 1) errorsCount1++;
             if(currentGame === 2) errorsCount2++;
             
@@ -587,13 +574,11 @@
     }
 
     function finishGame() {
-        // --- INSTRUCCIÓN CRÍTICA: DETENER AUDIOS ---
-        // Cancela cualquier audio del juego anterior inmediatamente
-        stopTTS();
+        window.speechSynthesis.cancel();
+        
         clearInterval(timerInterval);
         totalTime = (Date.now() - startTime) / 1000;
         
-        // --- CÁLCULO DE PUNTUACIÓN ---
         const totalPreguntas = TOTAL_PREGUNTAS_NIVEL1 + TOTAL_PREGUNTAS_NIVEL2;
         const totalAciertos = successCount1 + successCount2;
         const totalErrores = errorsCount1 + errorsCount2;
