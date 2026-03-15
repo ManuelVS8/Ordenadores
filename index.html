@@ -215,7 +215,7 @@
     <section class="screen active" id="startScreen" translate="no">
         <header>
             <h1>Partes de un ordenador</h1>
-            <div class="subtitle">Indica los principales componentess de un ordenador</div>
+            <div class="subtitle">Indica los principales componentes de un ordenador</div>
         </header>
 
         <div class="start-content">
@@ -375,81 +375,46 @@
     let totalTime = 0;
     let timerInterval;
     let currentGame = 1;
-    let preferredVoice = null;
-    
     const el = (id) => document.getElementById(id);
 
-    /* --- MEJORA DE VOZ (TTS) --- */
-    let voicesLoaded = false;
+    /* --- SÍNTESIS DE VOZ: Google TTS (sin Web Speech API) ---
+       Usa translate.google.com para generar MP3 del texto.
+       Funciona en Chromebooks sin voces instaladas. */
+    let currentTTSAudio = null;
 
-    function loadVoices() {
-        const voices = speechSynthesis.getVoices();
-        const esVoices = voices.filter(voice => voice.lang === 'es-ES' || voice.lang.startsWith('es'));
-        if (esVoices.length > 0) {
-            voicesLoaded = true;
-            preferredVoice = esVoices.find(voice => voice.name.includes('Google'));
-            if (!preferredVoice) preferredVoice = esVoices.find(voice => voice.name.includes('Microsoft') || voice.name.includes('Natural'));
-            if (!preferredVoice) preferredVoice = esVoices[0];
+    function playWordAudio(word, delay) {
+        if (isMuted) return;
+        // Cancelar audio TTS anterior si lo hay
+        if (currentTTSAudio) { currentTTSAudio.pause(); currentTTSAudio = null; }
+
+        function doSpeak() {
+            if (isMuted) return;
+            const url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=es&client=tw-ob&q=' + encodeURIComponent(word);
+            const audio = new Audio(url);
+            audio.volume = 1.0;
+            currentTTSAudio = audio;
+            audio.play().catch(e => console.warn('Google TTS error:', e));
         }
+
+        if (delay > 0) setTimeout(doSpeak, delay);
+        else doSpeak();
     }
 
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices();
-
-    // FIX CHROMEOS: Desbloqueo TTS robusto dentro del evento click.
-    // volume=0.01 en vez de 0 porque ChromeOS ignora utterances con volume=0.
-    function forceInitTTS() {
-        loadVoices();
-        // ESTRATEGIA COMBINADA + CORRECCIÓN GLM:
-        // Referencia directa a preferredVoice dentro de makeUnlock para evitar
-        // captura anticipada de null si loadVoices() acaba de poblarla.
-        function makeUnlock(rate, vol) {
-            const u = new SpeechSynthesisUtterance(' ');
-            u.lang = 'es-ES';
-            u.volume = vol;
-            u.rate = rate;
-            if (preferredVoice) u.voice = preferredVoice;
-            return u;
-        }
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(makeUnlock(10, 1));    // rapidísimo, inaudible (GLM)
-        window.speechSynthesis.speak(makeUnlock(1, 0.01));  // respaldo silencioso
+    function stopTTS() {
+        if (currentTTSAudio) { currentTTSAudio.pause(); currentTTSAudio = null; }
     }
 
-    /* --- INICIALIZACIÓN --- */
-    window.onload = () => {
-        el('playBtn').onclick = startGame;
-        
-        el('playWordBtn1').onclick = () => {
-            const targets = game1Targets;
-            playWordAudio(targets[playOrder[playIndex]].word, 0);
-        };
-        el('playWordBtn2').onclick = () => {
-            const targets = game2Targets;
-            playWordAudio(targets[playOrder[playIndex]].word, 0);
-        };
-        
-        el('muteBtn').onclick = toggleSound;
-        el('restartBtn').onclick = () => { playSound('tap'); location.reload(); };
-        
-        window.addEventListener('resize', () => {
-            if(el('gameScreen1').classList.contains('active')) placeMarkers(game1Targets, el('bodyImg1'), el('imgWrap1'));
-            if(el('gameScreen2').classList.contains('active')) placeMarkers(game2Targets, el('bodyImg2'), el('imgWrap2'));
-        });
-    };
-
+    /* --- AUDIO EFECTOS --- */
     function toggleSound() {
         isMuted = !isMuted;
         el('muteBtn').textContent = isMuted ? '🔇' : '🔊';
+        if (isMuted) stopTTS();
         playSound('tap');
     }
 
     function playSound(type) {
         if (isMuted) return;
         if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
         fetch(audioUrls[type])
             .then(response => response.arrayBuffer())
             .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
@@ -461,41 +426,29 @@
             });
     }
 
-    async function playWordAudio(word, delay) {
-        if (isMuted) return;
-        window.speechSynthesis.cancel();
+    /* --- INICIALIZACIÓN --- */
+    window.onload = () => {
+        el('playBtn').onclick = startGame;
 
-        function doSpeak() {
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'es-ES';
-            if (preferredVoice) utterance.voice = preferredVoice;
-            utterance.rate = 0.8;
-            utterance.pitch = 1;
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
-        }
+        el('playWordBtn1').onclick = () => {
+            const targets = game1Targets;
+            playWordAudio(targets[playOrder[playIndex]].word, 0);
+        };
+        el('playWordBtn2').onclick = () => {
+            const targets = game2Targets;
+            playWordAudio(targets[playOrder[playIndex]].word, 0);
+        };
 
-        if (voicesLoaded) {
-            if (delay > 0) setTimeout(doSpeak, delay);
-            else doSpeak();
-        } else {
-            // Reintento: espera hasta 800ms a que las voces carguen (ChromeOS)
-            let attempts = 0;
-            const waitForVoices = setInterval(() => {
-                loadVoices();
-                attempts++;
-                if (voicesLoaded || attempts >= 8) {
-                    clearInterval(waitForVoices);
-                    if (delay > 0) setTimeout(doSpeak, delay);
-                    else doSpeak();
-                }
-            }, 100);
-        }
-    }
+        el('muteBtn').onclick = toggleSound;
+        el('restartBtn').onclick = () => { playSound('tap'); location.reload(); };
+
+        window.addEventListener('resize', () => {
+            if (el('gameScreen1').classList.contains('active')) placeMarkers(game1Targets, el('bodyImg1'), el('imgWrap1'));
+            if (el('gameScreen2').classList.contains('active')) placeMarkers(game2Targets, el('bodyImg2'), el('imgWrap2'));
+        });
+    };
 
     function startGame() {
-        // FIX CHROMEOS: desbloqueo TTS obligatorio dentro del evento click
-        forceInitTTS();
         playSound('tap');
         startTime = Date.now();
         showScreen('gameScreen1');
@@ -636,8 +589,7 @@
     function finishGame() {
         // --- INSTRUCCIÓN CRÍTICA: DETENER AUDIOS ---
         // Cancela cualquier audio del juego anterior inmediatamente
-        window.speechSynthesis.cancel();
-        
+        stopTTS();
         clearInterval(timerInterval);
         totalTime = (Date.now() - startTime) / 1000;
         
